@@ -4,26 +4,16 @@
 #EXPOSE 8080
  
 # Pull base image.
-FROM ubuntu:16.04
+FROM ubuntu:12.04
 
-# Install Nginx.
-RUN \
-  add-apt-repository -y ppa:nginx/stable && \
-  apt-get update && \
-  apt-get install -y nginx && \
-  rm -rf /var/lib/apt/lists/* && \
-  echo "\ndaemon off;" >> /etc/nginx/nginx.conf && \
-  chown -R www-data:www-data /var/lib/nginx
+MAINTAINER Kimbro Staken version: 0.1
 
-# Define mountable directories.
-VOLUME ["/etc/nginx/sites-enabled", "/etc/nginx/certs", "/etc/nginx/conf.d", "/var/log/nginx", "/var/www/html"]
+RUN apt-get update && apt-get install -y apache2 && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Define working directory.
-WORKDIR /etc/nginx
+ENV APACHE_RUN_USER www-data
+ENV APACHE_RUN_GROUP www-data
+ENV APACHE_LOG_DIR /var/log/apache2
 
-# Define default command.
-CMD ["nginx"]
-
-# Expose ports.
 EXPOSE 80
-EXPOSE 443
+
+CMD ["/usr/sbin/apache2", "-D", "FOREGROUND"]
