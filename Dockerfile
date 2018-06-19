@@ -1,19 +1,11 @@
-#FROM golang:1.8
-#WORKDIR /webapp
-#Copy . /webapp
-#EXPOSE 8080
- 
-# Pull base image.
-FROM ubuntu:12.04
-
-MAINTAINER Kimbro Staken version: 0.1
-
-RUN apt-get update && apt-get install -y apache2 && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-ENV APACHE_RUN_USER www-data
-ENV APACHE_RUN_GROUP www-data
-ENV APACHE_LOG_DIR /var/log/apache2
-
-EXPOSE 80
-
-CMD ["/usr/sbin/apache2", "-D", "FOREGROUND"]
+From golang:latest
+COPY . /webapp
+WORKDIR  /webapp
+RUN mkdir src && \
+    mkdir pkg && \
+    mkdir bin
+RUN go get cloud.google.com/go/pubsub && \
+    go get google.golang.org/appengine
+EXPOSE 8080
+CMD go build main.go
+CMD go run main.go
