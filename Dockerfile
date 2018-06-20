@@ -1,11 +1,21 @@
-From golang:latest
-COPY . /webapp
-WORKDIR  /webapp
-RUN mkdir src && \
-    mkdir pkg && \
-    mkdir bin
-RUN go get cloud.google.com/go/pubsub && \
-    go get google.golang.org/appengine
-EXPOSE 8080
-CMD go build main.go
-CMD go run main.go
+FROM golang:alpine
+
+ARG pkg=github.com/GoogleCloudPlatform/golang-samples/getting-started/bookshelf
+
+RUN apk add --no-cache ca-certificates
+
+COPY . $GOPATH/src/$pkg
+
+RUN set -ex \
+      && apk add --no-cache --virtual .build-deps \
+              git \
+      && go get -v $pkg/... \
+      && apk del .build-deps
+
+RUN go install $pkg/...
+
+# Needed for templates for the front-end app.
+WORKDIR $GOPATH/src/$pkg/app
+
+# Users of the image should invoke either of the commands.
+CMD echo "Use the app or pubsub_worker commands."; exit 1
